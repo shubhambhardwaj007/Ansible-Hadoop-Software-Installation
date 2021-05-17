@@ -1,0 +1,97 @@
+---
+# tasks file for software_installation
+- name: "Checking if Java JDK already installed"
+  command: "java -version"
+  ignore_errors: true
+  changed_when: false
+  register: jdk_install_check
+
+- debug:
+        msg: "Java JDK already installed on your system"
+  when: jdk_install_check.rc == 0
+
+
+- debug:
+        msg: "Java JDK not installed on your system"
+  when: jdk_install_check.rc != 0
+
+- name: "Checking if Java JDK is present locally at specified location"
+  command: "ls -a {{ Java_Software_Directory }}{{ Java_Software_Version }}"
+  register: jdk_local_check_status
+  changed_when: false
+  ignore_errors: true
+
+- debug:
+        msg: "Java JDK Software Present locally at specified location"
+  when: jdk_local_check_status.rc == 0
+
+- debug:
+        msg: "Java JDK Software not Present locally at specified location"
+  when: jdk_local_check_status.rc != 0
+- name: "Creating Java JDK Software Directory"
+  file:
+          state: directory
+          path: "{{ Java_Software_Directory }}"
+  when: jdk_install_check.rc != 0 and jdk_local_check_status.rc != 0
+- name: "Downloading Java JDK Software"
+  get_url:
+          url: "https://repo.huaweicloud.com/java/jdk/8u171-b11/jdk-8u171-linux-x64.rpm"
+          dest: "{{ Java_Software_Directory }}"
+  when: jdk_install_check.rc != 0 and jdk_local_check_status.rc != 0
+
+- name: "Installing JDK Software(if not installed already)"
+  command: "rpm -i {{ Java_Software_Directory }}{{ Java_Software_Version }}"
+  when: jdk_install_check.rc != 0
+
+- name: "Checking if Hadoop Softwware already installed"
+  command: "hadoop -version"
+  ignore_errors: true
+  changed_when: false
+  register: hadoop_install_check
+
+- debug:
+        msg: "Hadoop Software already installed on your system"
+  when: hadoop_install_check.rc == 0
+
+
+- debug:
+        msg: "Hadoop Software not installed on your system"
+  when: hadoop_install_check.rc != 0
+
+- name: "Checking if Hadoop Software is present locally at specified location"
+  command: "ls -a {{ Hadoop_Software_Directory }}{{ Hadoop_Software_Version }}"
+  register: hadoop_local_check_status
+  changed_when: false
+  ignore_errors: true
+
+- debug:
+        msg: "Hadoop Software Present locally at specified location"
+  when: hadoop_local_check_status.rc == 0
+
+- debug:
+        msg: "Hadoop Software not Present locally at specified location"
+  when: hadoop_local_check_status.rc != 0
+- name: "Creating Hadoop Software Directory"
+  file:
+          state: directory
+          path: "{{ Hadoop_Software_Directory }}"
+  when: hadoop_install_check.rc != 0 and hadoop_local_check_status != 0
+
+- name: "Downloading Hadoop Software"
+  get_url:
+          url: "https://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1-1.x86_64.rpm"
+          dest: "{{ Hadoop_Software_Directory }}"
+  when: hadoop_install_check.rc != 0 and hadoop_local_check_status != 0
+
+- name: "Installing Hadoop Software(if not installed already)"
+  command: "rpm -i {{ Hadoop_Software_Directory }}{{ Hadoop_Software_Version }} --force"
+  when: hadoop_install_check.rc != 0
+- name: "Disabling firewalld service"
+  service:
+          name: "firewalld"
+          state: "stopped"
+          enabled: false
+- name: "Installing Python Interpreter"
+  package:
+          name: "python3"
+          state: present

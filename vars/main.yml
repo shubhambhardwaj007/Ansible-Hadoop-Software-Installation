@@ -1,0 +1,7 @@
+---
+# vars file for software_installation
+Java_Software_Directory: "/root/jdk_software/"
+Java_Software_Version: "jdk-8u171-linux-x64.rpm"
+
+Hadoop_Software_Directory: "/root/hadoop_software/"
+Hadoop_Software_Version: "hadoop-1.2.1-1.x86_64.rpm"
